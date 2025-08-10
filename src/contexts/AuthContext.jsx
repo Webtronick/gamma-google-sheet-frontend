@@ -8,21 +8,28 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [userProfile, setUserProfile] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [user, setUser]               = useState(false);
+    const [loading, setLoading]         = useState(false);
+    const [isLogin, setIsLogin]         = useState(null);
 
-    useEffect(()=>{
-        console.log("context-userProfile", userProfile);
-    }, [userProfile])
-
-    useEffect(()=>{
-        console.log("context-user:", user);
-    }, [user])
-
-    useEffect(()=>{
-        console.log("context-loading: ", loading);
-    }, [loading]);
+    useEffect(() => {
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            if (session?.user) {
+              setUser(session.user);
+              setIsLogin(true);
+            } else {
+              setUser(null);
+              setIsLogin(false);
+            }
+            setLoading(false);
+          }
+        );
+    
+        return () => {
+          authListener.subscription.unsubscribe();
+        };
+    }, []);
 
     // useEffect(() => {
     //     // Obtener sesión inicial
@@ -53,20 +60,16 @@ export const AuthProvider = ({ children }) => {
     //     );
     //     return () => subscription.unsubscribe();
     // }, []);
-
     
-
-    
-    
-
     const value = {
         user,
         setUser,
-        userProfile,
-        setUserProfile,
+        // userProfile,
+        // setUserProfile,
         loading,
         setLoading,
-        isAdmin: userProfile?.role === 'admin',
+        isLogin
+        // isAdmin: userProfile?.role === 'admin',
     };
 
     return (
