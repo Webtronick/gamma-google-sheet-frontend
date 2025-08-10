@@ -1,28 +1,27 @@
-import { Navigate } from 'react-router-dom';
+import Loader from './Loader/Loader';
+import { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
-    const { user, userProfile, loading, isAdmin } = useAuth();
+    const { isLogin, loading } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(isLogin !== null){
+            if (isLogin) {
+                navigate('/dashboard');
+            } else {
+                navigate('/login');
+            }
+        }
+    }, [isLogin]);
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Cargando...</p>
-                </div>
-            </div>
+            <Loader/>
         );
     }
-
-    if (!userProfile) {
-        return <Navigate to="/" replace />;
-    }
-
-    if (requireAdmin && !isAdmin) {
-        return <Navigate to="/dashboard" replace />;
-    }
-
     return children;
 };
 
