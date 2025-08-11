@@ -11,15 +11,18 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser]               = useState(false);
     const [loading, setLoading]         = useState(false);
     const [isLogin, setIsLogin]         = useState(null);
+    const [isAdmin, setIsAdmin]         = useState(false);
 
     useEffect(() => {
         const { data: authListener } = supabase.auth.onAuthStateChange(
           (event, session) => {
             if (session?.user) {
               setUser(session.user);
+              localStorage.setItem('token', session.access_token);
               setIsLogin(true);
             } else {
               setUser(null);
+              localStorage.removeItem('token');
               setIsLogin(false);
             }
             setLoading(false);
@@ -68,7 +71,9 @@ export const AuthProvider = ({ children }) => {
         // setUserProfile,
         loading,
         setLoading,
-        isLogin
+        isLogin,
+        isAdmin,
+        setIsAdmin
         // isAdmin: userProfile?.role === 'admin',
     };
 

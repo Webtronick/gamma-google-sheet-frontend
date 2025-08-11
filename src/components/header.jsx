@@ -1,9 +1,11 @@
-import { Bell, Settings, Clock, LogOut, Moon, Menu } from 'lucide-react';
+import { Bell, Settings, Clock, LogOut, Moon, Menu, RefreshCcw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { toast } from 'react-toastify';
+import { Slide } from 'react-toastify/unstyled';
 
 const Header = ({ toggleSidebar }) => {
-    const { userProfile, setUserProfile, setUser } = useAuth();
+    const { userProfile, setUserProfile, setUser, isAdmin } = useAuth();
 
     const signOut = async () => {
         try {
@@ -17,6 +19,53 @@ const Header = ({ toggleSidebar }) => {
             console.error('Error signing out:', error);
         }
     };
+
+    const syncData = async () => {
+        fetch(import.meta.env.VITE_WEBHOOK_MAKE, {
+            method: 'GET'
+        })
+        .then(response => {
+            if(response.status === 200){
+                toast.success('Proceso iniciado, esto puede tomar unos minutos', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Slide
+                });
+            }else{
+                toast.error('Error. Webhook no esta funcionando', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Slide
+                });
+            }
+        })
+        .catch(error => {
+            toast.error('Error. Webhook no esta funcionando', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Slide
+            });
+        });
+    };
+
     return (
         <header className="bg-white border-b border-gray-200 py-4 px-6">
             <div className="flex items-center gap-2">
@@ -28,13 +77,24 @@ const Header = ({ toggleSidebar }) => {
                 </button>
                 <div className='flex items-center justify-between w-full'>
                     <div>
-                        
                         {userProfile && (
                             <h1 className="text-2xl font-bold text-gray-900">Bienvenido(a), {userProfile.name} {userProfile.lastname}</h1>
                         )}
                     </div>
+
                     
                     <div className="flex items-center gap-4">
+                        {
+                            isAdmin && (
+                                <button 
+                                    onClick={syncData}
+                                    className="h-10 gap-2 rounded-full px-4 bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                                >
+                                    <RefreshCcw className="w-5 h-5" />
+                                    <p>Sincronizar Datos Usuarios</p>
+                                </button>
+                            )
+                        }
                         <button 
                             onClick={signOut}
                             className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"

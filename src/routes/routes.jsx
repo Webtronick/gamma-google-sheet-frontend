@@ -4,6 +4,7 @@ import UsersList from "../screens/Users/UsersList";
 import Dashboard from "../screens/Dashboard/Dashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Init from "../screens/Init";
+import SetPassword from "../screens/Login/SetPassword";
   
 const router = createBrowserRouter([
     {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
     {
         path: "/login",
         Component: Login
+    },
+    {
+        path: "/set-password",
+        Component: SetPassword
     },
     {
         path: "/users",

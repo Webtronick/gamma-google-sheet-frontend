@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 
-
-const Login = () => {
-    const [showPassword, setShowPassword] = useState(false);
+const SetPassword = () => {
+    const [showPassword, setShowPassword]               = useState(false);
+    const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -17,6 +17,7 @@ const Login = () => {
     const { userProfile, user, setUserProfile, setUser, loading, setLoading, setIsAdmin } = useAuth();
     const navigate = useNavigate();
 
+    console.log(user);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -32,75 +33,33 @@ const Login = () => {
         setLoading(true);
         setError('');
 
-        const { email } = formData;
-        const passwordLocal = formData.password;
+        const { password, password_confirm } = formData;
 
-        // setFormData(prev => ({ ...prev, password: '' }));
-        
-        const result = await signIn(email, passwordLocal);
-        
-        if (result.success) {
-            console.log("ingresa: ", result);
-            const role = result.role;
-
-            // TODO quitar esto
-            setIsAdmin(true);
-
-            if (role === 'admin') {
-                console.log(role);
-                navigate('/users', { replace: true });
-            } else {
-                console.log(role);
-                navigate('/dashboard', { replace: true });
-            }
+        if(password !== password_confirm) {
+            setError('Las contraseñas no coinciden');
+            setLoading(false);
+            return;
         }
         
-        setLoading(false);
-    };
-
-    const signIn = async (email, password) => {
-        try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
+        // Verifica si el usuario está autenticado a través del token del URL
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        if (currentUser) {
+            const { error } = await supabase.auth.updateUser({ password: password });
+            
             if (error) {
-                throw error;
-            }
-
-            // Esperar a que el perfil esté disponible inmediatamente tras el login
-            const profile = data?.user ? await fetchUserProfile(data.user.id) : null;
-            const role = profile?.role ?? null;
-
-            return { success: true, data, profile, role };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    };
-
-    const fetchUserProfile = async (userId) => {
-        console.log("entro...");
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            if (error) {
-                console.error('Error fetching user profile:', error);
-                return null;
+                setError('Error al establecer la contraseña: ' + error.message);
+                setLoading(false);
+                return;
             } else {
-                setUserProfile(data);
-                return data;
+                navigate('/dashboard');
             }
-        } catch (error) {
-            console.error('Error fetching user profile:', error);
-            return null;
+        } else {
+            setError('No se pudo autenticar al usuario. El enlace puede haber expirado.');
+            setLoading(false);
+            return;
         }
     };
-
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -108,10 +67,10 @@ const Login = () => {
                 <div className="bg-white rounded-xl shadow-lg p-8">
                     <div className="text-center mb-8">
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                            Bienvenido de vuelta
+                            Bienvenido
                         </h1>
                         <p className="text-gray-600">
-                            Inicia sesión para continuar
+                            Establece tu contraseña
                         </p>
                     </div>
 
@@ -123,29 +82,8 @@ const Login = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                Email*
-                            </label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                                    placeholder="Email"
-                                    required
-                                    disabled={loading}
-                                    autoComplete="email"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                Password*
+                                Contraseña *
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -156,7 +94,7 @@ const Login = () => {
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                                    placeholder="Password"
+                                    placeholder="Contraseña"
                                     required
                                     disabled={loading}
                                     autoComplete="current-password"
@@ -168,6 +106,35 @@ const Login = () => {
                                     disabled={loading}
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                Confirmar contraseña *
+                            </label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input
+                                    type={showPasswordConfirm ? "text" : "password"}
+                                    id="password_confirm"
+                                    name="password_confirm"
+                                    value={formData.password_confirm}
+                                    onChange={handleInputChange}
+                                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                    placeholder="Confirmar contraseña"
+                                    required
+                                    disabled={loading}
+                                    autoComplete="current-password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    disabled={loading}
+                                >
+                                    {showPasswordConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
                         </div>
@@ -196,4 +163,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SetPassword;

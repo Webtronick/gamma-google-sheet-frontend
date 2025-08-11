@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import Sidebar from './Sidebar';
 import Header from './header';
+import Sidebar from './Sidebar';
+import { ToastContainer } from 'react-toastify';
 
 const Layout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -25,6 +26,7 @@ const Layout = ({ children }) => {
                         {children}
                     </main>
                 </div>
+                <ToastContainer />
             </div>
         </div>
     );
