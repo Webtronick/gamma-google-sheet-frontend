@@ -13,22 +13,8 @@ const UsersContent = ({ data }) => {
             iconColor: 'text-blue-600'
         },
         {
-            title: 'Usuarios Activos',
-            value: data.filter(u => u.status === 'Active').length,
-            icon: User,
-            bgColor: 'bg-green-100',
-            iconColor: 'text-green-600'
-        },
-        {
-            title: 'Usuarios Inactivos',
-            value: data.filter(u => u.status === 'Inactive').length,
-            icon: User,
-            bgColor: 'bg-red-100',
-            iconColor: 'text-red-600'
-        },
-        {
             title: 'Administradores',
-            value: data.filter(u => u.role === 'Admin').length,
+            value: data.filter(u => u.role === 'admin').length,
             icon: User,
             bgColor: 'bg-purple-100',
             iconColor: 'text-purple-600'

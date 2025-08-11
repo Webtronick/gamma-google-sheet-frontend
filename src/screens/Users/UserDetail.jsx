@@ -1,21 +1,25 @@
-import ToastSimple from '../../utils/ToastSimple';
-import DataTable from 'react-data-table-component';
-import CardWidget from '../../components/cardWidget';
+import ToastSimple from "../../utils/ToastSimple";
+import DataTable from "react-data-table-component";
+import CardWidget from "../../components/cardWidget";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { DollarSign, TrendingUp, Search, ArrowLeftRight } from 'lucide-react';
+import { DollarSign, TrendingUp, ArrowLeftRight, Search, ArrowLeft } from 'lucide-react';
 
-const Dashboard = () => {
+const UserDetail = () => {
+    const navigate = useNavigate();
+    const location  = useLocation();
+    const { email, name } = location.state || {};
+    const { id } = useParams();       
+
     const [data, setData] = useState([]);
     const [filterText, setFilterText] = useState('');
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
 
-    const location  = useLocation();
-    const { id }    = location.state || {};
-
-    const { setLoading, user, isAdmin } = useAuth();
+    const { setLoading, isAdmin } = useAuth();
 
     const [totals, setTotals] = useState({
         current_capital: 0,
@@ -24,46 +28,13 @@ const Dashboard = () => {
         movements: 0
     });
 
-    const fetchData = async () => {
-        // setLoading(true);
-        try {
-            // Aquí deberías ajustar según tu estructura de datos
-            // Por ahora usamos datos de ejemplo
-            const mockData = [
-                { id: 1, start_date: '12/08/2025', init_capital: 300, current_capital: 400, withdraw: 100, current_profitability: '10%', retained_earning: 60,  retained_profitability: '5%' },
-                { id: 2, start_date: '14/08/2024', init_capital: 300, current_capital: 900, withdraw: 100, current_profitability: '1%', retained_earning: 58,  retained_profitability: '9%' },
-                { id: 3, start_date: '14/06/2024', init_capital: 300, current_capital: 1000, withdraw: 600, current_profitability: '12%', retained_earning: 30,  retained_profitability: '3%' },
-
-            ];
-
-            setData(mockData);
-
-            // Calcular totales
-            const totalAmount = mockData.reduce((sum, item) => sum + item.retained_earning, 0);
-            const totalIncome = mockData.filter(item => item.type === 'income').reduce((sum, item) => sum + item.retained_earning, 0);
-            const totalExpenses = mockData.filter(item => item.type === 'expense').reduce((sum, item) => sum + item.retained_earning, 0);
-
-            setTotals({
-                totalAmount,
-                totalIncome,
-                totalExpenses,
-                totalTransactions: mockData.length
-            });
-
-            // setLoading(false);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        !isAdmin && sendRequest();
+        isAdmin && sendRequest();
     }, []);
 
     const sendRequest = async () => {
         setLoading(true);
-        const { data, error } = await supabase.from('carteras').select('*').eq('email', user.email);
+        const { data, error } = await supabase.from('carteras').select('*').eq('email', email);
         if (error) {
             ToastSimple.toastError("Se produjo un error al obtener los datos");
         } else {
@@ -249,7 +220,14 @@ const Dashboard = () => {
     };
 
     return (
-        !isAdmin && <div>
+        isAdmin && <div>
+            {/* Boton ir hacia atras */}
+            <div className="flex justify-start gap-2">
+                <button onClick={() => navigate('/users')} className="flex items-center gap-2 text-gray-900 font-semibold text-lg py-4 px-4 rounded-full transition-colors">
+                    <ArrowLeft className="w-6 h-6" />
+                    Regresar
+                </button>
+            </div>
             {/* Tarjetas de resumen */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 {widgets.map((widget, index) => (
@@ -268,7 +246,7 @@ const Dashboard = () => {
             <div className="bg-white rounded-xl shadow-sm">
                 <div className="p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-semibold text-gray-900">Transacciones</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">Transacciones de {name}</h2>
                         <div className="flex items-center gap-2">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -308,4 +286,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+export default UserDetail;

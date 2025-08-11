@@ -1,23 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
-    const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
+    const navigate = useNavigate();
+    const { user, setUser, loading, setLoading, setIsAdmin, setInfoUser, isLogin, setIsLogin } = useAuth();
+
+    const [error, setError]                 = useState('');
+    const [showPassword, setShowPassword]   = useState(false);
+    const [formData, setFormData]           = useState({
         email: '',
         password: ''
     });
-    // const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     
-    const { userProfile, user, setUserProfile, setUser, loading, setLoading, setIsAdmin } = useAuth();
-    const navigate = useNavigate();
-
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -32,29 +29,17 @@ const Login = () => {
         setLoading(true);
         setError('');
 
-        const { email } = formData;
-        const passwordLocal = formData.password;
-
-        // setFormData(prev => ({ ...prev, password: '' }));
+        const { email, password } = formData;
         
-        const result = await signIn(email, passwordLocal);
-        
+        const result = await signIn(email, password);
         if (result.success) {
-            console.log("ingresa: ", result);
-            const role = result.role;
-
-            // TODO quitar esto
-            setIsAdmin(true);
-
-            if (role === 'admin') {
-                console.log(role);
-                navigate('/users', { replace: true });
-            } else {
-                console.log(role);
-                navigate('/dashboard', { replace: true });
-            }
+            localStorage.setItem('token', result.data?.session?.access_token);
+            localStorage.setItem('user', JSON.stringify(result.data.user));
+            setUser(result.data.user);
+            navigate("/");
+        }else{
+            setError(result.error);
         }
-        
         setLoading(false);
     };
 
@@ -66,12 +51,15 @@ const Login = () => {
             });
 
             if (error) {
-                throw error;
+                return { success: false, error: error.message };
             }
 
             // Esperar a que el perfil esté disponible inmediatamente tras el login
             const profile = data?.user ? await fetchUserProfile(data.user.id) : null;
             const role = profile?.role ?? null;
+
+            localStorage.setItem('profile', JSON.stringify(profile));
+            localStorage.setItem('role', role);
 
             return { success: true, data, profile, role };
         } catch (error) {
@@ -80,7 +68,6 @@ const Login = () => {
     };
 
     const fetchUserProfile = async (userId) => {
-        console.log("entro...");
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -92,7 +79,6 @@ const Login = () => {
                 console.error('Error fetching user profile:', error);
                 return null;
             } else {
-                setUserProfile(data);
                 return data;
             }
         } catch (error) {
@@ -105,7 +91,7 @@ const Login = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full">
-                <div className="bg-white rounded-xl shadow-lg p-8">
+                <div className="bg-white rounded-xl shadow-lg pt-8 px-8 pb-4">
                     <div className="text-center mb-8">
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">
                             Bienvenido de vuelta
@@ -121,7 +107,7 @@ const Login = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+                    <form onSubmit={handleSubmit} className="space-y-6 pb-4" autoComplete="off">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                 Email*
@@ -190,6 +176,9 @@ const Login = () => {
                             )}
                         </button>
                     </form>
+                    <a href="https://webtronick.com" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-600 mt-2 block">
+                        Powered by <span className="font-bold text-blue-600">Webtronick</span>
+                    </a>
                 </div>
             </div>
         </div>

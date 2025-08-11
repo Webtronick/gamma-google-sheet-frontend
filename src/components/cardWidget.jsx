@@ -1,4 +1,3 @@
-import { User } from 'lucide-react';
 
 const CardWidget = ({ title, value, icon: Icon, bgColor, textColor, iconColor }) => {
     return (

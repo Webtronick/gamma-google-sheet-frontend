@@ -12,69 +12,42 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading]         = useState(false);
     const [isLogin, setIsLogin]         = useState(null);
     const [isAdmin, setIsAdmin]         = useState(false);
+    const [infoUser, setInfoUser]       = useState(null);
 
     useEffect(() => {
         const { data: authListener } = supabase.auth.onAuthStateChange(
           (event, session) => {
             if (session?.user) {
-              setUser(session.user);
-              localStorage.setItem('token', session.access_token);
-              setIsLogin(true);
+                localStorage.setItem('token', session.access_token);           
+                setUser(session.user);
+                setIsLogin(true);
             } else {
-              setUser(null);
-              localStorage.removeItem('token');
-              setIsLogin(false);
+                setUser(null);
+                localStorage.removeItem('token');
+                setIsLogin(false);
+                setInfoUser(null);
+                setIsAdmin(false);
             }
             setLoading(false);
           }
         );
     
         return () => {
-          authListener.subscription.unsubscribe();
+            authListener.subscription.unsubscribe();
         };
     }, []);
-
-    // useEffect(() => {
-    //     // Obtener sesión inicial
-    //     const getSession = async () => {
-    //         const { data: { session } } = await supabase.auth.getSession();
-    //         if (session?.user) {
-    //             setUser(session.user);
-    //             await fetchUserProfile(session.user.id);
-    //         }
-    //         console.log("la data: ", session)
-    //         setLoading(false);
-    //     };
-
-    //     getSession();
-
-    //     // Escuchar cambios en la autenticación
-    //     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    //         async (event, session) => {
-    //             if (session?.user) {
-    //                 setUser(session.user);
-    //                 await fetchUserProfile(session.user.id);
-    //             } else {
-    //                 setUser(null);
-    //                 setUserProfile(null);
-    //             }
-    //             setLoading(false);
-    //         }
-    //     );
-    //     return () => subscription.unsubscribe();
-    // }, []);
     
     const value = {
         user,
         setUser,
-        // userProfile,
-        // setUserProfile,
         loading,
         setLoading,
         isLogin,
+        setIsLogin,
         isAdmin,
-        setIsAdmin
-        // isAdmin: userProfile?.role === 'admin',
+        setIsAdmin,
+        infoUser,
+        setInfoUser
     };
 
     return (

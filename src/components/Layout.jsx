@@ -1,18 +1,55 @@
 import { useEffect, useState } from 'react';
 import Header from './header';
 import Sidebar from './Sidebar';
+import Loader from './Loader/Loader';
 import { ToastContainer } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext';
+import { Outlet, useNavigate } from 'react-router';
 
-const Layout = ({ children }) => {
+const Layout = () => {
+    const { isLogin, user, setIsAdmin, isAdmin, setInfoUser, loading, setUser, setIsLogin } = useAuth();
+    const navigate = useNavigate();
+    
+    const [ready, setReady]             = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     useEffect(()=>{
-        console.log("cambio a: ", sidebarOpen);
-    }, [sidebarOpen])
+        // completamos ctx
+        const profileData = JSON.parse(localStorage.getItem('profile'));
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if(profileData){
+            userData && setUser(userData);
+            profileData && setInfoUser(profileData);
+            const role = profileData.role;
+            setIsAdmin(role === 'admin');
+            setIsLogin(true);
+            if(role === 'admin'){
+                navigate('/users');
+            }else{
+                navigate('/dashboard');
+            }
+        }else{
+            setIsAdmin(false);
+            setUser(null);
+            setIsLogin(false);
+            setInfoUser(null);
+            localStorage.removeItem('profile');
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            navigate('/login');
+        }
+    }, [])
+
+    useEffect(() => {
+        if(user !== false && user !== null){
+            setReady(true);
+        }
+    }, [user]);
+
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             {/* Sidebar */}
-            <div className={`shadow-md transition-all duration-400 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
+            <div className={`shadow-md transition-all duration-400 ${sidebarOpen ? "w-60" : "w-0 overflow-hidden"}`}>
                 <Sidebar/>
             </div>
 
@@ -23,11 +60,15 @@ const Layout = ({ children }) => {
                 <div className="flex-1 flex overflow-y-auto">
                     {/* Contenido dinámico */}
                     <main className="flex-1 p-6">
-                        {children}
+                        {ready && <Outlet />}
                     </main>
                 </div>
                 <ToastContainer />
+                <a href="https://webtronick.com" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-600 mt-2 pr-12 pb-1 text-right block">
+                    Powered by <span className="font-bold text-blue-600">Webtronick</span>
+                </a>
             </div>
+            {loading && <Loader />}
         </div>
     );
 };

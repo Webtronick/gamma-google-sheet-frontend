@@ -1,68 +1,49 @@
-import { Bell, Settings, Clock, LogOut, Moon, Menu, RefreshCcw } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
+import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import { Slide } from 'react-toastify/unstyled';
+import { useAuth } from '../contexts/AuthContext';
+import { LogOut, Menu, RefreshCcw } from 'lucide-react';
+import ToastSimple from '../utils/ToastSimple';
 
 const Header = ({ toggleSidebar }) => {
-    const { userProfile, setUserProfile, setUser, isAdmin } = useAuth();
+    const navigate = useNavigate();
+    const { setUser, user, isAdmin, setIsLogin, infoUser, setLoading } = useAuth();
 
     const signOut = async () => {
         try {
+            setLoading(true);
             const { error } = await supabase.auth.signOut();
             if (error) {
+                setLoading(false);
                 throw error;
             }
             setUser(null);
-            setUserProfile(null);
+            setIsLogin(false);
+            localStorage.removeItem("role");
+            localStorage.removeItem("profile");
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            navigate('/login');
         } catch (error) {
+            setLoading(false);
             console.error('Error signing out:', error);
         }
     };
 
     const syncData = async () => {
-        fetch(import.meta.env.VITE_WEBHOOK_MAKE, {
-            method: 'GET'
+        fetch(import.meta.env.VITE_BACKEND_URL+"/webhook-make", {
+            method: 'POST'
         })
         .then(response => {
             if(response.status === 200){
-                toast.success('Proceso iniciado, esto puede tomar unos minutos', {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Slide
-                });
+                ToastSimple.toastSuccess('Proceso iniciado, esto puede tomar unos minutos');
             }else{
-                toast.error('Error. Webhook no esta funcionando', {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Slide
-                });
+                ToastSimple.toastError('Error. Webhook no esta funcionando');
             }
         })
         .catch(error => {
-            toast.error('Error. Webhook no esta funcionando', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Slide
-            });
+            ToastSimple.toastError('Error. Webhook no esta funcionando');
         });
     };
 
@@ -77,12 +58,11 @@ const Header = ({ toggleSidebar }) => {
                 </button>
                 <div className='flex items-center justify-between w-full'>
                     <div>
-                        {userProfile && (
-                            <h1 className="text-2xl font-bold text-gray-900">Bienvenido(a), {userProfile.name} {userProfile.lastname}</h1>
+                        {user && (
+                            <h1 className="md:text-xl font-bold text-gray-900">Bienvenido(a), {infoUser?.name}</h1>
                         )}
                     </div>
 
-                    
                     <div className="flex items-center gap-4">
                         {
                             isAdmin && (
@@ -91,7 +71,7 @@ const Header = ({ toggleSidebar }) => {
                                     className="h-10 gap-2 rounded-full px-4 bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
                                 >
                                     <RefreshCcw className="w-5 h-5" />
-                                    <p>Sincronizar Datos Usuarios</p>
+                                    <p className="hidden md:block">Sincronizar Datos Usuarios</p>
                                 </button>
                             )
                         }

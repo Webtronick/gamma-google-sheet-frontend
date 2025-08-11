@@ -1,47 +1,21 @@
 import Modal from './Modal/Modal';
-import { useEffect, useState } from 'react';
+import ToastSimple from '../utils/ToastSimple';
 import DataTable from 'react-data-table-component';
-import { Search, Filter, Eye, Edit, Trash2, Mail } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
 import { Slide, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { Search, Eye, Mail } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const UsersTable = ({ data }) => {
-    const { loading, setLoading } = useAuth();
+    const { setLoading } = useAuth();
     const [filterText, setFilterText] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
-    const [userList, setUserList] = useState([]);
     const [formData, setFormData] = useState({
         email: '',
     });
     const nav = useNavigate();
-
-    useEffect(()=>{
-        sendRequest();
-    },[])
-
-    const sendRequest = async () =>{
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-
-                console.log("data nueva: ", data);
-
-            if (error) {
-                console.error('Error getting the users:', error);
-                return null;
-            } else {
-                setUserList(data);
-                return data;
-            }
-        } catch (error) {
-            console.error('Error fetching user profile:', error);
-            return null;
-        }
-    }
 
 
     // Función para obtener el color del status
@@ -110,12 +84,12 @@ const UsersTable = ({ data }) => {
             ),
         },
         {
-            name: 'Último Acceso',
-            selector: row => row.lastLogin,
+            name: 'Creado',
+            selector: row => row.created_at,
             sortable: true,
-            cell: row => (
+            cell: row => (  
                 <div className="text-sm text-gray-600">
-                    {new Date(row.lastLogin).toLocaleDateString('es-ES')}
+                    {new Date(row.created_at).toLocaleDateString('es-ES')}
                 </div>
             ),
         },
@@ -124,19 +98,18 @@ const UsersTable = ({ data }) => {
             cell: row => (
                 <div className="flex items-center gap-2">
                     <button 
-                        onClick={()=>nav('/dashboard', {state: {id: row.id}})}
+                        onClick={()=>nav('/user/detail/' + row.id, {state: {email: row.email, name: row.name}})}
                         className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
                     >
                         <Eye className="w-4 h-4" />
                     </button>
                 </div>
-            ),
-            // width: '200px'
+            )
         }
     ];
 
     // Filtrado de datos
-    const filteredItems = userList.filter(
+    const filteredItems = data.filter(
         item => item.name.toLowerCase().includes(filterText.toLowerCase()) ||
                 item.email.toLowerCase().includes(filterText.toLowerCase()) ||
                 item.role.toLowerCase().includes(filterText.toLowerCase())
@@ -192,7 +165,7 @@ const UsersTable = ({ data }) => {
             setError('Email inválido');
             return;
         }
-        setLoading(true);
+        // setLoading(true);
         let body = {
             email: formData.email
         };
@@ -207,49 +180,17 @@ const UsersTable = ({ data }) => {
         })
         .then(response => response.json())
         .then(response => {
-            console.log("response: ", response);
             if (response.success) {
                 setShowModal(false);
                 setFormData({ email: '' });
-                toast.success('Usuario invitado correctamente', {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Slide
-                });
+                ToastSimple.toastSuccess('Usuario invitado correctamente');
             }else{
-                toast.error('Error al invitar usuario', {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Slide
-                });
+                ToastSimple.toastError('Error al invitar usuario');
             }
             setLoading(false);
         })
         .catch(error => {
-            console.error('Error al invitar usuario:', error);
-            toast.error('Error al invitar usuario', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Slide
-            });
+            ToastSimple.toastError('Error al invitar usuario');
             setLoading(false);
         });
     };
