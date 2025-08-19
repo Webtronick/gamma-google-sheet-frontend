@@ -23,10 +23,14 @@ const Layout = () => {
             const role = profileData.role;
             setIsAdmin(role === 'admin');
             setIsLogin(true);
-            if(role === 'admin'){
-                navigate('/users');
-            }else{
-                navigate('/dashboard');
+
+            let route = window.location.pathname;
+            if(route === '/'){
+                if(role !== 'admin'){
+                    navigate('/dashboard');
+                }else{
+                    navigate('/users');
+                }
             }
         }else{
             setIsAdmin(false);

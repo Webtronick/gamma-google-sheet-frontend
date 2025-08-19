@@ -165,7 +165,7 @@ const UsersTable = ({ data }) => {
             setError('Email inválido');
             return;
         }
-        // setLoading(true);
+        setLoading(true);
         let body = {
             email: formData.email
         };
@@ -227,6 +227,8 @@ const UsersTable = ({ data }) => {
                     data={filteredItems}
                     pagination
                     paginationResetDefaultPage={resetPaginationToggle}
+                    paginationRowsPerPageOptions={[30, 50, 100]}
+                    paginationRowsPerPage={30}
                     persistTableHead
                     customStyles={customStyles}
                     paginationComponentOptions={{

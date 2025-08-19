@@ -1,14 +1,14 @@
-import { toast } from 'react-toastify';
+import ToastSimple from '../utils/ToastSimple';
+import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Slide } from 'react-toastify/unstyled';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, Menu, RefreshCcw } from 'lucide-react';
-import ToastSimple from '../utils/ToastSimple';
 
 const Header = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const { setUser, user, isAdmin, setIsLogin, infoUser, setLoading } = useAuth();
+    const [loadingSync, setLoadingSync] = useState(false);
 
     const signOut = async () => {
         try {
@@ -32,6 +32,7 @@ const Header = ({ toggleSidebar }) => {
     };
 
     const syncData = async () => {
+        setLoadingSync(true);
         fetch(import.meta.env.VITE_BACKEND_URL+"/webhook-make", {
             method: 'POST'
         })
@@ -41,9 +42,11 @@ const Header = ({ toggleSidebar }) => {
             }else{
                 ToastSimple.toastError('Error. Webhook no esta funcionando');
             }
+            setLoadingSync(false);
         })
         .catch(error => {
             ToastSimple.toastError('Error. Webhook no esta funcionando');
+            setLoadingSync(false);
         });
     };
 
@@ -68,9 +71,15 @@ const Header = ({ toggleSidebar }) => {
                             isAdmin && (
                                 <button 
                                     onClick={syncData}
+                                    disabled={loadingSync}
                                     className="h-10 gap-2 rounded-full px-4 bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
                                 >
-                                    <RefreshCcw className="w-5 h-5" />
+                                    {
+                                        loadingSync ? 
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                        :
+                                        <RefreshCcw className="w-5 h-5" />
+                                    }
                                     <p className="hidden md:block">Sincronizar Datos Usuarios</p>
                                 </button>
                             )

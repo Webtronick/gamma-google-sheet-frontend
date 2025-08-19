@@ -1,3 +1,4 @@
+import HandlerApp from "../../lib/HandlerApp";
 import ToastSimple from "../../utils/ToastSimple";
 import DataTable from "react-data-table-component";
 import CardWidget from "../../components/cardWidget";
@@ -40,13 +41,15 @@ const UserDetail = () => {
         } else {
             if(data.length > 0){
                 let infoWidgets = data[data.length - 1];
+                let datos = data;
+                datos[data.length - 1].start_date = 'TOTAL';
                 setTotals({
                     current_capital: infoWidgets.current_capital,
                     retained_earnings: infoWidgets.retained_earnings,
                     retained_profitability: infoWidgets.retained_profitability,
                     movements: data.length
                 });
-                setData(data);
+                setData(datos);
             }else{
                 setData([]);
             }
@@ -58,28 +61,28 @@ const UserDetail = () => {
     const widgets = [
         {
             title: 'Capital actual',
-            value: `$${totals.current_capital.toLocaleString()}`,
+            value: HandlerApp.formatCurrency(totals.current_capital),
             icon: DollarSign,
             bgColor: 'bg-blue-100',
             iconColor: 'text-blue-600'
         },
         {
             title: 'Ganancias acumuladas',
-            value: `$${totals.retained_earnings.toLocaleString()}`,
+            value: HandlerApp.formatCurrency(totals.retained_earnings),
             icon: TrendingUp,
             bgColor: 'bg-green-100',
             iconColor: 'text-green-600'
         },
         {
             title: 'Rentabilidad acumulada',
-            value: `${totals.retained_profitability}`,
+            value: HandlerApp.formatPercentage(totals.retained_profitability),
             icon: TrendingUp,
             bgColor: 'bg-green-100',
             iconColor: 'text-green-600'
         },
         {
             title: 'Movimientos',
-            value: totals.movements,
+            value: totals.movements -1,
             icon: ArrowLeftRight,
             bgColor: 'bg-purple-100',
             iconColor: 'text-purple-600'
@@ -93,7 +96,7 @@ const UserDetail = () => {
             sortable: true,
             cell: row => (
                 <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    {row.start_date}
+                    {row.start_date ? row.start_date : 'TOTAL:'}
                 </span>
             ),
         },
@@ -101,65 +104,41 @@ const UserDetail = () => {
             name: 'Capital inicial',
             selector: row => row.init_capital,
             sortable: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    ${row.init_capital}
-                </span>
-            ),
+            cell: row => HandlerApp.formatCurrency(row.init_capital)
         },
         {
             name: 'Capital actual',
             wrap: true,
             selector: row => row.current_capital,
             sortable: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    ${row.current_capital}
-                </span>
-            ),
+            cell: row => HandlerApp.formatCurrency(row.current_capital)
         },
         {
             name: 'Retiros o liquidación',
             selector: row => row.withdraw,
             sortable: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    ${row.withdraw}
-                </span>
-            ),
+            cell: row => HandlerApp.formatCurrency(row.withdraw)
         },
         {
             name: 'Rentabilidad actual',
             selector: row => row.current_profitability,
             wrap: true,
             sortable: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    {row.current_profitability}
-                </span>
-            ),
+            cell: row => HandlerApp.formatPercentage(row.current_profitability)
         },
         {
             name: 'Ganancia acumulada',
             wrap: true,
             selector: row => row.retained_earnings,
             sortable: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    ${row.retained_earnings}
-                </span>
-            ),
+            cell: row => HandlerApp.formatCurrency(row.retained_earnings)
         },
         {
             name: 'Rentabilidad acumulada',
             wrap: true,
             selector: row => row.retained_profitability,
             sortable: true,
-            cell: row => (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium`}>
-                    {row.retained_profitability}
-                </span>
-            ),
+            cell: row => HandlerApp.formatPercentage(row.retained_profitability)
         }
     ];
 

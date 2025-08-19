@@ -14,12 +14,9 @@ const SetPassword = () => {
         email: '',
         password: ''
     });
-    // const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     
-    const {user, setUser, loading, setLoading, setIsAdmin } = useAuth();
-
-    console.log("====user", user);
+    const {user, setUser, loading, setLoading, setIsAdmin, setIsLogin } = useAuth();
 
     useEffect(() => {
         if(user !== false && user !== null){
@@ -28,7 +25,7 @@ const SetPassword = () => {
                 createProfile();
             }
         }
-    }, [user.id]);
+    }, [user?.id]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -40,7 +37,6 @@ const SetPassword = () => {
     };
 
     const createProfile = async () => {
-        console.log("Creando perfil");
         fetch(import.meta.env.VITE_BACKEND_URL + '/create-profile', {
             method: 'POST',
             headers: {
@@ -64,7 +60,6 @@ const SetPassword = () => {
         });
     }
         
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -113,7 +108,7 @@ const SetPassword = () => {
         .then(response => response.json())
         .then(response => {
             if (response.success) {
-                navigate('/dashboard');
+                signOut();
             }else{
                 ToastSimple.toastError('Error actualizando información');
                 setLoading(false);
@@ -123,6 +118,27 @@ const SetPassword = () => {
             console.error('Error al crear el perfil:', error);
         });
     }
+
+    const signOut = async () => {
+        try {
+            setLoading(true);
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                setLoading(false);
+                throw error;
+            }
+            setUser(null);
+            setIsLogin(false);
+            localStorage.removeItem("role");
+            localStorage.removeItem("profile");
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            navigate('/login');
+        } catch (error) {
+            setLoading(false);
+            console.error('Error signing out:', error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -233,11 +249,11 @@ const SetPassword = () => {
                             {loading ? (
                                 <>
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    Iniciando sesión...
+                                    Enviando...
                                 </>
                             ) : (
                                 <>
-                                    Iniciar sesión
+                                    Enviar
                                     <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
