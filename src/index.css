@@ -48,5 +48,9 @@
 }
 
 .rdt_PaginationButton[aria-current="true"] {
-  @apply bg-blue-600 text-white border-blue-600;
+  @apply bg-blue-900 text-white border-blue-900;
+}
+
+.section-container-table {
+  overflow: hidden;
 }

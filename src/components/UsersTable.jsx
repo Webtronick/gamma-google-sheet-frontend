@@ -52,7 +52,7 @@ const UsersTable = ({ data }) => {
             sortable: true,
             cell: row => (
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                    <div className="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center text-white font-medium text-sm">
                         {((row.name).substring(0,2)).toUpperCase()}
                     </div>
                     <div>
@@ -198,22 +198,28 @@ const UsersTable = ({ data }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm">
             <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Lista de Usuarios</h2>
-                    <div className="flex items-end gap-2">
-                        <div className="relative">
+                <div className="flex items-center justify-between w-full sm:flex-row flex-col">
+                    <button 
+                        onClick={() => setShowModal(true)}
+                        className="px-4 py-2 bg-primary-900 border border-gray-200 rounded-lg text-primary-50 hover:bg-primary-900 transition-colors flex items-center gap-2 mb-4 sm:mb-0 sm:hidden block"
+                    >
+                        Invitar usuarios
+                    </button>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2 sm:mb-0">Lista de Usuarios</h2>
+                    <div className="flex items-end gap-2 w-full sm:w-auto">
+                        <div className="relative w-full sm:w-auto">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="Buscar usuarios..."
                                 value={filterText}
                                 onChange={e => setFilterText(e.target.value)}
-                                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:w-auto w-full"
                             />
                         </div>
                         <button 
                             onClick={() => setShowModal(true)}
-                            className="px-4 py-2 bg-primary-600 border border-gray-200 rounded-lg text-primary-50 hover:bg-primary-700 transition-colors flex items-center gap-2"
+                            className="px-4 py-2 bg-primary-900 border border-gray-200 rounded-lg text-primary-50 hover:bg-primary-900 transition-colors flex items-center gap-2 sm:block hidden"
                         >
                             Invitar usuarios
                         </button>
@@ -221,7 +227,7 @@ const UsersTable = ({ data }) => {
                 </div>
             </div>
             
-            <div className="p-6">
+            <div className="p-6 w-full">
                 <DataTable
                     columns={columns}
                     data={filteredItems}
@@ -253,14 +259,14 @@ const UsersTable = ({ data }) => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-800 focus:border-transparent transition-colors"
                                 placeholder="Email"
                                 required
                                 autoComplete="email"
                             />
                         </div>
                     </div>
-                    <button type="submit" className="h-10 mt-4 bg-primary-600 border border-gray-200 rounded-lg text-primary-50 hover:bg-primary-700 transition-colors">Enviar</button>
+                    <button type="submit" className="h-10 mt-4 bg-primary-900 border border-gray-200 rounded-lg text-primary-50 hover:bg-primary-800 transition-colors">Enviar</button>
                 </form>
             </Modal>
         </div>

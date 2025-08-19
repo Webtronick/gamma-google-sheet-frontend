@@ -203,43 +203,44 @@ const Dashboard = () => {
             </div>
 
             {/* Lista de transacciones */}
-            <div className="bg-white rounded-xl shadow-sm">
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-semibold text-gray-900">Transacciones</h2>
-                        <div className="flex items-center gap-2">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar por fecha..."
-                                    value={filterText}
-                                    onChange={e => setFilterText(e.target.value)}
-                                    className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
+            <div className="section-container-table">
+                <div className="container-table">
+                    <div className="bg-white rounded-xl shadow-sm">
+                        <div className="p-6 border-b border-gray-200">
+                            <div className="flex items-center justify-between sm:flex-row flex-col">
+                                <h2 className="text-lg font-semibold text-gray-900">Transacciones</h2>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <div className="relative w-full sm:w-auto">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar por fecha..."
+                                            value={filterText}
+                                            onChange={e => setFilterText(e.target.value)}
+                                            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <DataTable
+                            columns={columns}
+                            data={filteredItems}
+                            responsive={true}
+                            pagination
+                            paginationRowsPerPageOptions={[30, 50, 100]}
+                            paginationPerPage={30}
+                            paginationResetDefaultPage={resetPaginationToggle}
+                            persistTableHead
+                            customStyles={customStyles}
+                            paginationComponentOptions={{
+                                rowsPerPageText: 'Filas por página:',
+                                rangeSeparatorText: 'de',
+                                selectAllRowsItem: true,
+                                selectAllRowsItemText: 'Todos',
+                            }}
+                        />
                     </div>
-                </div>
-                
-                <div className="p-6">
-                    <DataTable
-                        columns={columns}
-                        data={filteredItems}
-                        responsive={true}
-                        pagination
-                        paginationRowsPerPageOptions={[30, 50, 100]}
-                        paginationPerPage={30}
-                        paginationResetDefaultPage={resetPaginationToggle}
-                        persistTableHead
-                        customStyles={customStyles}
-                        paginationComponentOptions={{
-                            rowsPerPageText: 'Filas por página:',
-                            rangeSeparatorText: 'de',
-                            selectAllRowsItem: true,
-                            selectAllRowsItemText: 'Todos',
-                        }}
-                    />
                 </div>
             </div>
         </div>

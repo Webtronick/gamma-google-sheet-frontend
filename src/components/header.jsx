@@ -72,7 +72,7 @@ const Header = ({ toggleSidebar }) => {
                                 <button 
                                     onClick={syncData}
                                     disabled={loadingSync}
-                                    className="h-10 gap-2 rounded-full px-4 bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                                    className="h-10 gap-2 rounded-full px-4 bg-blue-900 flex items-center justify-center text-white hover:bg-blue-800 transition-colors"
                                 >
                                     {
                                         loadingSync ? 
@@ -86,7 +86,7 @@ const Header = ({ toggleSidebar }) => {
                         }
                         <button 
                             onClick={signOut}
-                            className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                            className="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center text-white hover:bg-blue-800 transition-colors"
                         >
                             <LogOut className="w-5 h-5" />
                         </button>

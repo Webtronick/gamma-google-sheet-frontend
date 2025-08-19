@@ -11,7 +11,30 @@ const Layout = () => {
     const navigate = useNavigate();
     
     const [ready, setReady]             = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024); // Default to true on desktop
+    const [isMobile, setIsMobile]       = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+            // On mobile, we want to close the sidebar by default
+            if (mobile) {
+                setSidebarOpen(false);
+            } else {
+                setSidebarOpen(true);
+            }
+        };
+
+        // Set initial state
+        handleResize();
+
+        // Add event listener
+        window.addEventListener('resize', handleResize);
+
+        // Clean up
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(()=>{
         // completamos ctx
@@ -57,16 +80,13 @@ const Layout = () => {
                 <Sidebar/>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-x-auto z-100">
+            <div className="flex flex-col w-full overflow-x-auto z-100">
                 {/* Header */}
                 <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)}/>
                 {/* Contenido principal */}
-                <div className="flex-1 flex overflow-y-auto">
-                    {/* Contenido dinámico */}
-                    <main className="flex-1 p-6">
-                        {ready && <Outlet />}
-                    </main>
-                </div>
+                <main className="w-full p-6">
+                    {ready && <Outlet />}
+                </main>
                 <ToastContainer />
                 <a href="https://webtronick.com" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-600 mt-2 pr-12 pb-1 text-right block">
                     Powered by <span className="font-bold text-blue-600">Webtronick</span>
