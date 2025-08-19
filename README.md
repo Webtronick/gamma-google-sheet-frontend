@@ -32,31 +32,7 @@ Una aplicación moderna de gestión de usuarios con interfaz elegante y funciona
 ```env
 VITE_SUPABASE_URL=your_supabase_url_here
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
-```
-
-3. Configura la tabla `profiles` en Supabase con la siguiente estructura:
-
-```sql
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users ON DELETE CASCADE,
-  name TEXT,
-  lastname TEXT,
-  email TEXT,
-  role TEXT DEFAULT 'user',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-  PRIMARY KEY (id)
-);
-
--- Habilitar RLS (Row Level Security)
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-
--- Políticas de seguridad
-CREATE POLICY "Users can view own profile" ON profiles
-  FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update own profile" ON profiles
-  FOR UPDATE USING (auth.uid() = id);
+VITE_BACKEND_URL=https://your-backend-project.com
 ```
 
 ## Instalación
@@ -79,29 +55,38 @@ npm run dev
 
 ```
 src/
-├── components/
-│   ├── Layout.jsx           # Layout principal con header y sidebar
-│   ├── ProtectedRoute.jsx   # Componente para rutas protegidas
-│   ├── UsersContent.jsx     # Contenido de la página de usuarios
-│   ├── cardWidget.jsx       # Componente para las tarjetas de estadísticas
-│   ├── header.jsx           # Header del dashboard
-│   ├── Sidebar.jsx          # Barra lateral de navegación
-│   └── UsersTable.jsx       # Tabla de usuarios con DataTable
+├── assets/                 # Recursos estáticos (imágenes, fuentes, etc.)
+├── components/             # Componentes reutilizables
+│   ├── Layout/            
+│   │   └── Layout.jsx      # Layout principal con header y sidebar
+│   ├── Loader/
+│   │   └── Loader.jsx      # Componente de carga
+│   ├── Modal/
+│   │   └── Modal.jsx       # Componente de modal reutilizable
+│   ├── ProtectedRoute.jsx  # Componente para rutas protegidas
+│   ├── Sidebar.jsx         # Barra lateral de navegación
+│   ├── UsersContent.jsx    # Contenido de la página de usuarios
+│   ├── UsersTable.jsx      # Tabla de usuarios con DataTable
+│   ├── cardWidget.jsx      # Componente para las tarjetas de estadísticas
+│   └── header.jsx          # Header del dashboard
 ├── contexts/
-│   └── AuthContext.jsx      # Contexto de autenticación
+│   └── AuthContext.jsx     # Contexto de autenticación
 ├── lib/
-│   └── supabase.js          # Configuración de Supabase
-├── screens/
-│   ├── Login/
-│   │   └── Login.jsx        # Pantalla de login
-│   ├── Users/
-│   │   └── UsersList.jsx    # Listado de usuarios (solo admin)
-│   └── Dashboard/
-│       └── Dashboard.jsx    # Dashboard para usuarios normales
+│   └── supabase.js         # Configuración de Supabase
 ├── routes/
-│   └── routes.js            # Configuración de rutas protegidas
-├── App.jsx                  # Componente principal con AuthProvider
-└── index.css                # Estilos globales
+│   └── routes.js           # Configuración de rutas protegidas
+├── screens/                # Pantallas/páginas de la aplicación
+│   ├── Dashboard/
+│   │   └── Dashboard.jsx   # Dashboard para usuarios
+│   ├── Login/
+│   │   ├── Login.jsx       # Pantalla de inicio de sesión
+│   │   └── SetPassword.jsx # Pantalla para establecer contraseña
+│   └── Users/
+│       ├── UsersList.jsx   # Listado de usuarios (solo admin)
+│       └── UserDetail.jsx  # Detalle de usuario
+├── utils/                  # Utilidades y helpers
+├── App.jsx                 # Componente principal con AuthProvider
+└── index.css               # Estilos globales
 ```
 
 ## Rutas disponibles
@@ -204,6 +189,7 @@ Dashboard para usuarios normales:
 Configura las variables de Supabase en el archivo `.env`:
 
 ```env
+VITE_BACKEND_URL=https://your-backend-project.com
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_anon_key_here
 ```
@@ -223,13 +209,6 @@ theme: {
   }
 }
 ```
-
-### Datos
-Los datos de ejemplo se encuentran en los componentes correspondientes. Para usar datos reales:
-
-1. Configura las tablas en Supabase
-2. Actualiza las consultas en los componentes
-3. Ajusta la estructura de datos según tus necesidades
 
 ## Scripts disponibles
 
