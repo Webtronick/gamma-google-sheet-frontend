@@ -54,3 +54,7 @@
 .section-container-table {
   overflow: hidden;
 }
+
+main {
+  flex: 1;
+}
