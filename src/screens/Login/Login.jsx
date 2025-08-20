@@ -93,9 +93,9 @@ const Login = () => {
             <div className="hidden sm:flex w-1/4 sm:w-2/5 min-h-screen bg-white">
                 <div className="flex min-h-screen w-full">
                     <div className="flex flex-col justify-center w-full">
-                        <h1 className="text-4xl sm:text-3xl font-bold text-center w-full text-blue-900 mb-2 p-2">Bienvenido al Futuro de las Inversiones</h1>
-                        <div className='h-1/3 flex justify-center items-center pb-10'>
-                            <img src="/logo.png" alt="Logo" className="h-48 mb-8 p-4" />
+                        <h1 className="text-4xl sm:text-3xl font-bold text-center w-full text-blue-900 mb-2 p-2">El Futuro de las Inversiones</h1>
+                        <div className='h-1/5 flex justify-center items-center pb-10'>
+                            <img src="/logo.png" alt="Logo" className="h-36 mb-8 p-4" />
                         </div>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ const Login = () => {
                     <div className="bg-white w-full rounded-xl shadow-lg pt-8 px-4 pb-4 sm:pt-8 sm:px-4 md:px-8">
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-blue-900 mb-2">
-                                Bienvenido de vuelta
+                                Bienvenido
                             </h1>
                             <p className="text-gray-600">
                                 Inicia sesión para continuar
