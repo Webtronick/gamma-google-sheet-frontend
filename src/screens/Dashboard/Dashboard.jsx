@@ -30,27 +30,31 @@ const Dashboard = () => {
     }, []);
 
     const sendRequest = async () => {
-        setLoading(true);
-        const { data, error } = await supabase.from('carteras').select('*').eq('email', user.email);
-        if (error) {
-            ToastSimple.toastError("Se produjo un error al obtener los datos");
-        } else {
-            if(data.length > 0){
-                let infoWidgets = data[data.length - 1];
-                let datos = data;
-                datos[data.length - 1].start_date = 'TOTAL';
-                setTotals({
-                    current_capital: infoWidgets.current_capital,
-                    retained_earnings: infoWidgets.retained_earnings,
-                    retained_profitability: infoWidgets.retained_profitability,
-                    movements: data.length
-                });
-                setData(datos);
-            }else{
-                setData([]);
+        try {
+            setLoading(true);
+            const { data, error } = await supabase.from('carteras').select('*').eq('email', user.email);
+            if (error) {
+                ToastSimple.toastError("Se produjo un error al obtener los datos");
+            } else {
+                if(data.length > 0){
+                    let infoWidgets = data[data.length - 1];
+                    let datos = data;
+                    datos[data.length - 1].start_date = 'TOTAL';
+                    setTotals({
+                        current_capital: infoWidgets.current_capital,
+                        retained_earnings: infoWidgets.retained_earnings,
+                        retained_profitability: infoWidgets.retained_profitability,
+                        movements: data.length
+                    });
+                    setData(datos);
+                }else{
+                    setData([]);
+                }
             }
+            setLoading(false);
+        }catch(error){
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     // Configuración de widgets

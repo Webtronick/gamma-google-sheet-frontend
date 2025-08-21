@@ -24,6 +24,7 @@ const Header = ({ toggleSidebar }) => {
             localStorage.removeItem("profile");
             localStorage.removeItem("user");
             localStorage.removeItem("token");
+            localStorage.removeItem("freq");
             navigate('/login');
         } catch (error) {
             setLoading(false);
