@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,24 +6,14 @@ import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { user, setUser, loading, setLoading, setIsAdmin, setInfoUser, isLogin, setIsLogin, setEnabledLogin, setIs2FAAvailable } = useAuth();
+    const { user, setUser, loading, setLoading, setIsAdmin, setInfoUser, isLogin, setIsLogin } = useAuth();
 
     const [error, setError]                 = useState('');
     const [showPassword, setShowPassword]   = useState(false);
-    const [is2FAEnabled, setIs2FAEnabled]   = useState(false);
-    const [code, setCode]                   = useState('');
-    const [isVerifying, setIsVerifying]     = useState(false);
-    const [secret, setSecret]               = useState('');
     const [formData, setFormData]           = useState({
         email: '',
         password: ''
     });
-
-    useEffect(()=>{
-        if(isLogin){
-            navigate('/');
-        }
-    }, [isLogin]);
     
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -46,65 +36,12 @@ const Login = () => {
             localStorage.setItem('token', result.data?.session?.access_token);
             localStorage.setItem('user', JSON.stringify(result.data.user));
             setUser(result.data.user);
-
-            check2FA(result.data.user);
-
-        } else {
-            setLoading(false);
+            navigate("/");
+        }else{
             setError(result.error);
         }
+        setLoading(false);
     };
-
-    const check2FA = async (user) => {
-        setLoading(true);
-        setError('');
-
-        try {
-            const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/check-2fa', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                },
-                body: JSON.stringify({
-                    user_id: user.id
-                })
-            });
-            
-            let data = await response.json();
-            if (data.success) {
-                data = data.data;
-                if(data.is_2fa_enabled){
-                    setIs2FAEnabled(true);
-                    setIs2FAAvailable(true);
-                    try {
-                        const _secret = data?.secret_2fa;
-                        if(_secret){
-                            setSecret(atob(atob(atob(atob(_secret)))));
-                        }
-                    }catch(error){
-                        setError('Error al verificar factores de seguridad');
-                    }
-                }else{
-                    setIs2FAAvailable(false);
-                    setIs2FAEnabled(false);
-                    setUser(user);
-                    generateKeyForLogin();
-                    setEnabledLogin(true);
-                    // setIsLogin(true);
-                    navigate('/');
-                }
-            } else {
-                setLoading(false);
-                setError(data.message);
-            }
-        } catch (error) {
-            setLoading(false);
-            setError('Error de conexión con el servidor');
-        } finally {
-            setLoading(false);
-        }
-    }
 
     const signIn = async (email, password) => {
         try {
@@ -134,7 +71,7 @@ const Login = () => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, email, name, lastname, role, status')
+                .select('*')
                 .eq('id', userId)
                 .single();
 
@@ -149,64 +86,6 @@ const Login = () => {
             return null;
         }
     };
-
-    const handleVerify = async (e) => {
-        e.preventDefault();
-        
-        if (!code.trim()) {
-            setError('Por favor ingresa el código de verificación');
-            return;
-        }
-        
-        setLoading(true);
-        setError('');
-        
-        try {
-            const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/validate-2fa', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                },
-                body: JSON.stringify({
-                    code: code.trim(),
-                    secret: secret,
-                    user_id: user.id
-                })
-            });
-            
-            let data = await response.json();
-            if (data.success) {
-                generateKeyForLogin();
-                setEnabledLogin(true);
-                setIsLogin(true);
-                navigate('/');
-            } else {
-                setCode('');
-                setError(data.message);
-            }
-        } catch (error) {
-            setError('Error de conexión con el servidor');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const randomBetweenOneMillionAndOneBillion = ()=>{
-        const min = 1_000_000;      // 1 millón
-        const max = 1_000_000_000;  // 1 billón
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    const generateKeyForLogin = ()=>{
-        const random = randomBetweenOneMillionAndOneBillion();
-        const random2 = randomBetweenOneMillionAndOneBillion();
-        const random3 = randomBetweenOneMillionAndOneBillion();
-        const random4 = randomBetweenOneMillionAndOneBillion();
-        const key = random + random2 + "-" + "1" + "-" + random3 + random4;
-
-        localStorage.setItem("freq", btoa(btoa(btoa(btoa(key.toString())))));
-    }
 
 
     return (
@@ -229,68 +108,6 @@ const Login = () => {
                     </div>
                 </div>
                 <div className="h-3/4 sm:w-5/6 md:w-2/3 lg:w-2/4 sm:h-full flex justify-center items-start sm:items-center align-center mx-2">
-                {is2FAEnabled ? (
-                    <div className="bg-white rounded-xl shadow-lg pt-8 px-8 pb-6">
-                        <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                                Verificación en dos pasos
-                            </h1>
-                            <p className="text-gray-600">
-                                Por favor ingresa el código de verificación de tu aplicación de autenticación
-                            </p>
-                        </div>
-
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleVerify} className="space-y-6">
-                            <div>
-                                <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Código de verificación
-                                </label>
-                                <input
-                                    id="code"
-                                    name="code"
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    value={code}
-                                    onChange={(e) => {
-                                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-                                        setCode(value);
-                                        if (error) setError('');
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    placeholder="123456"
-                                    autoComplete="one-time-code"
-                                    required
-                                    autoFocus
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isVerifying}
-                                className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-blue-900 hover:bg-blue-800 ${isVerifying ? 'opacity-70 cursor-not-allowed' : ''}`}
-                            >
-                                {isVerifying ? (
-                                    <>
-                                        <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                        Verificando...
-                                    </>
-                                ) : (
-                                    <>
-                                        Verificar y continuar
-                                        <ArrowRight className="ml-2 -mr-1 w-4 h-4" />
-                                    </>
-                                )}
-                            </button>
-                        </form>
-                    </div>
-                ) : (
                     <div className="bg-white w-full rounded-xl shadow-lg pt-8 px-4 pb-4 sm:pt-8 sm:px-4 md:px-8">
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-blue-900 mb-2">
@@ -380,7 +197,6 @@ const Login = () => {
                             Powered by <span className="font-bold text-blue-800">Webtronick</span>
                         </a>
                     </div>
-                )}
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@ const UsersList = () => {
 
     const sendRequest = async () => {
         setLoading(true);
-        const { data, error } = await supabase.from('profiles').select('*').order('role', { ascending: true }).order('created_at', { ascending: true });
+        const { data, error } = await supabase.from('profiles').select('id, email, name, lastname, role, status').order('role', { ascending: true }).order('created_at', { ascending: true });
         if (error) {
             console.error('Error fetching users:', error);
         } else {

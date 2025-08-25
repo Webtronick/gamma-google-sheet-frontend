@@ -1,10 +1,11 @@
 import { createBrowserRouter } from "react-router";
+import Layout from "../components/Layout";  
 import Login from "../screens/Login/Login";
+import Setup2FA from "../screens/Login/Setup2FA";
 import UsersList from "../screens/Users/UsersList";
+import UserDetail from "../screens/Users/UserDetail";
 import Dashboard from "../screens/Dashboard/Dashboard";
 import SetPassword from "../screens/Login/SetPassword";
-import Layout from "../components/Layout";  
-import UserDetail from "../screens/Users/UserDetail";
 
 const router = createBrowserRouter([
     {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
     {
         path: "/set-password",
         Component: SetPassword
+    },
+    {
+        path: "/setup-2fa",
+        Component: Setup2FA
     },
     {
         path: "/",

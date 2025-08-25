@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Outlet, useNavigate } from 'react-router';
 
 const Layout = () => {
-    const { isLogin, user, setIsAdmin, isAdmin, setInfoUser, loading, setUser, setIsLogin } = useAuth();
+    const { isLogin, user, setIsAdmin, isAdmin, setInfoUser, loading, setUser, setIsLogin, is2FAAvailable, enabledLogin } = useAuth();
     const navigate = useNavigate();
     
     const [ready, setReady]             = useState(false);
@@ -40,22 +40,38 @@ const Layout = () => {
         // completamos ctx
         const profileData = JSON.parse(localStorage.getItem('profile'));
         const userData = JSON.parse(localStorage.getItem('user'));
-        if(profileData){
-            userData && setUser(userData);
-            profileData && setInfoUser(profileData);
-            const role = profileData.role;
-            setIsAdmin(role === 'admin');
-            setIsLogin(true);
-
-            let route = window.location.pathname;
-            if(route === '/'){
-                if(role !== 'admin'){
-                    navigate('/dashboard');
-                }else{
-                    navigate('/users');
+        try{
+            // variable que permite saber si el usuario puede hacer login
+            let available = verifyAvailabilityLogin();
+            if(profileData && available){
+                userData && setUser(userData);
+                profileData && setInfoUser(profileData);
+                const role = profileData.role;
+                setIsAdmin(role === 'admin');
+                setIsLogin(true);
+    
+                let route = window.location.pathname;
+                if(route === '/'){
+                    if(role !== 'admin'){
+                        navigate('/dashboard');
+                    }else{
+                        navigate('/users');
+                    }
                 }
+            }else{
+                setIsAdmin(false);
+                setUser(null);
+                setIsLogin(false);
+                setInfoUser(null);
+                localStorage.removeItem('profile');
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                localStorage.removeItem('freq');
+                localStorage.removeItem('role');
+                navigate('/login');
             }
-        }else{
+
+        }catch(error){
             setIsAdmin(false);
             setUser(null);
             setIsLogin(false);
@@ -63,9 +79,21 @@ const Layout = () => {
             localStorage.removeItem('profile');
             localStorage.removeItem('user');
             localStorage.removeItem('token');
+            localStorage.removeItem('freq');
+            localStorage.removeItem('role');
             navigate('/login');
         }
     }, [])
+
+    const verifyAvailabilityLogin = ()=>{
+        const login = localStorage.getItem('freq');
+        if(login){
+            const availableLogin = atob(atob(atob(atob(login))));
+            const available = availableLogin.split("-")[1];
+            return available === "1";
+        }
+        return false;
+    }
 
     useEffect(() => {
         if(user !== false && user !== null){

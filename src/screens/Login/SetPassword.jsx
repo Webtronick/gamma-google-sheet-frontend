@@ -108,7 +108,8 @@ const SetPassword = () => {
         .then(response => response.json())
         .then(response => {
             if (response.success) {
-                signOut();
+                navigate('/setup-2fa');
+                // signOut();
             }else{
                 ToastSimple.toastError('Error actualizando información');
                 setLoading(false);
@@ -133,6 +134,7 @@ const SetPassword = () => {
             localStorage.removeItem("profile");
             localStorage.removeItem("user");
             localStorage.removeItem("token");
+            localStorage.removeItem("freq");
             navigate('/login');
         } catch (error) {
             setLoading(false);
